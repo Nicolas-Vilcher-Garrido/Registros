@@ -1,65 +1,40 @@
 import { useEffect } from 'react';
-import { Drawer } from 'expo-router/drawer';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { Home, ClipboardList, PlusCircle, UserCircle } from 'lucide-react-native';
-import Colors from '@/constants/Colors';
+import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { SplashScreen } from 'expo-router';
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useFrameworkReady();
 
+  const [fontsLoaded, fontError] = useFonts({
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+    'Inter-Bold': Inter_700Bold,
+  });
+
+  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <>
-      <Drawer
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: Colors.primary[500],
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontFamily: 'Inter-SemiBold',
-          },
-          drawerStyle: {
-            backgroundColor: '#fff',
-            width: 280,
-          },
-          drawerActiveTintColor: Colors.primary[500],
-          drawerInactiveTintColor: Colors.gray[700],
-          drawerLabelStyle: {
-            fontFamily: 'Inter-Medium',
-            marginLeft: -20,
-          },
-        }}>
-        <Drawer.Screen
-          name="(main)/index"
-          options={{
-            title: 'Home',
-            drawerIcon: ({ color, size }) => <Home size={size} color={color} />,
-          }}
-        />
-        <Drawer.Screen
-          name="(main)/records"
-          options={{
-            title: 'Records',
-            drawerIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
-          }}
-        />
-        <Drawer.Screen
-          name="(main)/add"
-          options={{
-            title: 'Add Record',
-            drawerIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
-          }}
-        />
-        <Drawer.Screen
-          name="(main)/profile"
-          options={{
-            title: 'Profile',
-            drawerIcon: ({ color, size }) => <UserCircle size={size} color={color} />,
-          }}
-        />
-      </Drawer>
-      <StatusBar style="light" />
+      <Stack>
+        <Stack.Screen name="(main)" options={{ headerShown: false }} />
+      </Stack>
+      <StatusBar style="auto" />
     </>
   );
 }
